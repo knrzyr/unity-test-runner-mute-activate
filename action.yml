@@ -1,5 +1,5 @@
-name: 'Unity - Test runner'
-author: Webber Takken <webber@takken.io>
+name: 'Test runner - skip activate for floating license'
+author: knrzyr <knrzyr@gmail.com>
 description: 'Run tests for any Unity project.'
 inputs:
   unityVersion:
