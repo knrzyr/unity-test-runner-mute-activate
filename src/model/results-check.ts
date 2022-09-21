@@ -1,6 +1,5 @@
 import * as core from '@actions/core';
 import * as fs from 'fs';
-import * as github from '@actions/github';
 import Handlebars from 'handlebars';
 import ResultsParser from './results-parser';
 import { RunMeta } from './results-meta';
@@ -47,7 +46,6 @@ const ResultsCheck = {
     core.info(runSummary.summary);
 
     // Format output
-    const title = runSummary.summary;
     const summary = await ResultsCheck.renderSummary(runs);
     core.debug(`Summary view: ${summary}`);
     const details = await ResultsCheck.renderDetails(runs);
@@ -60,34 +58,7 @@ const ResultsCheck = {
       return annotation;
     });
     core.debug(`Annotations: ${annotations}`);
-    const output = {
-      title,
-      summary,
-      text: details,
-      annotations: annotations.slice(0, 50),
-    };
-
-    // Call GitHub API
-    // await ResultsCheck.requestGitHubCheck(githubToken, checkName, output);
     return runSummary.failed;
-  },
-
-  async requestGitHubCheck(githubToken, checkName, output) {
-    const pullRequest = github.context.payload.pull_request;
-    const headSha = (pullRequest && pullRequest.head.sha) || github.context.sha;
-
-    core.info(`Posting results for ${headSha}`);
-    const createCheckRequest = {
-      ...github.context.repo,
-      name: checkName,
-      head_sha: headSha,
-      status: 'completed',
-      conclusion: 'neutral',
-      output,
-    };
-
-    const octokit = github.getOctokit(githubToken);
-    await octokit.rest.checks.create(createCheckRequest);
   },
 
   async renderSummary(runMetas) {
