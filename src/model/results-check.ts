@@ -68,7 +68,7 @@ const ResultsCheck = {
     };
 
     // Call GitHub API
-    await ResultsCheck.requestGitHubCheck(githubToken, checkName, output);
+    // await ResultsCheck.requestGitHubCheck(githubToken, checkName, output);
     return runSummary.failed;
   },
 
