@@ -53,7 +53,7 @@ async function run() {
     }
 
     if (githubToken) {
-      const failedTestCount = await ResultsCheck.createCheck(artifactsPath, githubToken, checkName, renderResultDetail);
+      const failedTestCount = await ResultsCheck.createCheck(artifactsPath, githubToken, checkName);
       if (failedTestCount >= 1) {
         core.setFailed(`Test(s) Failed! Check '${checkName}' for details.`);
       }
