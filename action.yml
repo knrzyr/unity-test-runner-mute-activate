@@ -52,6 +52,10 @@ inputs:
     required: false
     default: ''
     description: 'User and optionally group (user or user:group or uid:gid) to give ownership of the resulting build artifacts'
+  licenseServer:
+    required: false
+    default: ''
+    description: 'By passing the contents of Unity's service_config.json as a string, you can start using the license server.'
 outputs:
   artifactsPath:
     description: 'Path where the artifacts are stored.'

@@ -1,5 +1,5 @@
 import * as core from '@actions/core';
-import { Action, Docker, ImageTag, Input, Output, ResultsCheck } from './model';
+import { Action, Docker, ImageTag, Input, Output, ResultsCheck, CreateServiceConfig } from './model';
 
 async function run() {
   try {
@@ -20,7 +20,11 @@ async function run() {
       githubToken,
       checkName,
       chownFilesTo,
+      licenseServer,
     } = Input.getFromUser();
+
+    const useLicenseServer = await CreateServiceConfig.writeServiceConfig(licenseServer, workspace);
+
     const baseImage = new ImageTag({ editorVersion, customImage });
     const runnerTemporaryPath = process.env.RUNNER_TEMP;
 
@@ -40,6 +44,7 @@ async function run() {
         githubToken,
         runnerTemporaryPath,
         chownFilesTo,
+        useLicenseServer,
       });
     } finally {
       await Output.setArtifactsPath(artifactsPath);

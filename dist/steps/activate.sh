@@ -4,7 +4,11 @@
 echo "Changing to \"$ACTIVATE_LICENSE_PATH\" directory."
 pushd "$ACTIVATE_LICENSE_PATH"
 
-if [[ -n "$UNITY_LICENSE" ]] || [[ -n "$UNITY_LICENSE_FILE"  ]]; then
+if [[ -n "$UNITY_LICENSE_SERVER" ]]; then
+
+ echo "Activate by license server"
+
+elif [[ -n "$UNITY_LICENSE" ]] || [[ -n "$UNITY_LICENSE_FILE"  ]]; then
   #
   # PERSONAL LICENSE MODE
   #
@@ -77,7 +81,6 @@ elif [[ -n "$UNITY_SERIAL" && -n "$UNITY_EMAIL" && -n "$UNITY_PASSWORD" ]]; then
 
   # Store the exit code from the verify command
   UNITY_EXIT_CODE=$?
-
 else
   #
   # NO LICENSE ACTIVATION STRATEGY MATCHED

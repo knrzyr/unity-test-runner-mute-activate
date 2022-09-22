@@ -27,6 +27,7 @@ const Input = {
     const githubToken = getInput('githubToken') || '';
     const checkName = getInput('checkName') || 'Test Results';
     const chownFilesTo = getInput('chownFilesTo') || '';
+    const licenseServer = getInput('licenseServer') || '';
 
     // Validate input
     if (!this.testModes.includes(testMode)) {
@@ -67,6 +68,7 @@ const Input = {
       githubToken,
       checkName,
       chownFilesTo,
+      licenseServer,
     };
   },
 };

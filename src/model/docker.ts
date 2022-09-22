@@ -34,6 +34,7 @@ const Docker = {
       githubToken,
       runnerTemporaryPath,
       chownFilesTo,
+      useLicenseServer,
     } = parameters;
 
     const githubHome = path.join(runnerTemporaryPath, '_github_home');
@@ -76,6 +77,7 @@ const Docker = {
                 --env RUNNER_WORKSPACE \
                 --env GIT_PRIVATE_TOKEN="${gitPrivateToken}" \
                 --env CHOWN_FILES_TO="${chownFilesTo}" \
+                ${useLicenseServer ? '--env UNITY_LICENSE_SERVER' : ''} \
                 ${sshAgent ? '--env SSH_AUTH_SOCK=/ssh-agent' : ''} \
                 --volume "${githubHome}:/root:z" \
                 --volume "${githubWorkflow}:/github/workflow:z" \
@@ -88,6 +90,7 @@ const Docker = {
                 } \
                 ${useHostNetwork ? '--net=host' : ''} \
                 ${githubToken ? '--env USE_EXIT_CODE=false' : '--env USE_EXIT_CODE=true'} \
+                ${useLicenseServer ? `--volume ${workspace}/services-config.json:/usr/share/unity3d/config/services-config.json` : ''} \
                 ${image} \
                 /bin/bash -c /entrypoint.sh`;
   },
@@ -108,6 +111,7 @@ const Docker = {
       githubToken,
       runnerTemporaryPath,
       chownFilesTo,
+      useLicenseServer,
     } = parameters;
 
     const githubHome = path.join(runnerTemporaryPath, '_github_home');
@@ -150,6 +154,7 @@ const Docker = {
                 --env RUNNER_WORKSPACE \
                 --env GIT_PRIVATE_TOKEN="${gitPrivateToken}" \
                 --env CHOWN_FILES_TO="${chownFilesTo}" \
+                ${useLicenseServer ? '--env UNITY_LICENSE_SERVER' : ''} \
                 ${sshAgent ? '--env SSH_AUTH_SOCK=c:/ssh-agent' : ''} \
                 --volume "${githubHome}":"c:/root" \
                 --volume "${githubWorkflow}":"c:/github/workflow" \
@@ -164,6 +169,7 @@ const Docker = {
                 } \
                 ${useHostNetwork ? '--net=host' : ''} \
                 ${githubToken ? '--env USE_EXIT_CODE=false' : '--env USE_EXIT_CODE=true'} \
+                ${useLicenseServer ? `--volume ${workspace}/services-config.json:c:/ProgramData/Unity/config/services-config.json` : ''} \
                 ${image} \
                 powershell c:/dist/entrypoint.ps1`;
   },
