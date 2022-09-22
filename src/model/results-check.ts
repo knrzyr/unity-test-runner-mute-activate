@@ -50,6 +50,8 @@ const ResultsCheck = {
     const title = runSummary.summary;
     const summary = await ResultsCheck.renderSummary(runs);
     core.debug(`Summary view: ${summary}`);
+    const details = await ResultsCheck.renderDetails(runs);
+    core.debug(`Details view: ${details}`);
     const rawAnnotations = runSummary.extractAnnotations();
     core.debug(`Raw annotations: ${rawAnnotations}`);
     const annotations = rawAnnotations.map(rawAnnotation => {
@@ -61,6 +63,7 @@ const ResultsCheck = {
     const output = {
       title,
       summary,
+      text: details,
       annotations: annotations.slice(0, 50),
     };
 
