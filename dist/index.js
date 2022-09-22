@@ -155,7 +155,7 @@ const CreateServiceConfig = {
         return __awaiter(this, void 0, void 0, function* () {
             if (licenseServer.length <= 0)
                 return false;
-            const filePath = (0, path_1.join)(workspace, 'service_config.json');
+            const filePath = (0, path_1.join)(workspace, 'services-config.json');
             try {
                 yield fs_1.promises.writeFile(filePath, licenseServer, {
                     flag: 'w',

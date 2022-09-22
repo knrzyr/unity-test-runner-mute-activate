@@ -55,7 +55,7 @@ inputs:
   licenseServer:
     required: false
     default: ''
-    description: 'By passing the contents of Unity's service_config.json as a string, you can start using the license server.'
+    description: 'By passing the contents of service-config.json(see. Unity build server) as a string, you can start using the license server.'
 outputs:
   artifactsPath:
     description: 'Path where the artifacts are stored.'

@@ -6,7 +6,7 @@ const CreateServiceConfig = {
     if (licenseServer.length <= 0)
       return false;
   
-    const filePath = join(workspace, 'service_config.json');
+    const filePath = join(workspace, 'services-config.json');
   
     try {
       await fsPromises.writeFile(filePath, licenseServer, {
