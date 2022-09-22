@@ -70,7 +70,7 @@ function run() {
                 yield model_1.Output.setCoveragePath('CodeCoverage');
             }
             if (githubToken) {
-                const failedTestCount = yield model_1.ResultsCheck.createCheck(artifactsPath, githubToken, checkName);
+                const failedTestCount = yield model_1.ResultsCheck.createCheck(artifactsPath, githubToken, checkName, renderResultDetail);
                 if (failedTestCount >= 1) {
                     core.setFailed(`Test(s) Failed! Check '${checkName}' for details.`);
                 }
@@ -729,7 +729,7 @@ const results_parser_1 = __importDefault(__nccwpck_require__(4552));
 const results_meta_1 = __nccwpck_require__(5552);
 const path_1 = __importDefault(__nccwpck_require__(1017));
 const ResultsCheck = {
-    createCheck(artifactsPath, githubToken, checkName) {
+    createCheck(artifactsPath, githubToken, checkName, renderResultDetail) {
         return __awaiter(this, void 0, void 0, function* () {
             // Validate input
             if (!fs.existsSync(artifactsPath) || !githubToken || !checkName) {
@@ -766,6 +766,12 @@ const ResultsCheck = {
             const title = runSummary.summary;
             const summary = yield ResultsCheck.renderSummary(runs);
             core.debug(`Summary view: ${summary}`);
+            var details = '';
+            const renderDetail = renderResultDetail === 'true';
+            if (renderDetail) {
+                details = yield ResultsCheck.renderDetails(runs);
+                core.debug(`Details view: ${details}`);
+            }
             const rawAnnotations = runSummary.extractAnnotations();
             core.debug(`Raw annotations: ${rawAnnotations}`);
             const annotations = rawAnnotations.map(rawAnnotation => {
@@ -774,7 +780,12 @@ const ResultsCheck = {
                 return annotation;
             });
             core.debug(`Annotations: ${annotations}`);
-            const output = {
+            const output = renderDetail ? {
+                title,
+                summary,
+                text: details,
+                annotations: annotations.slice(0, 50),
+            } : {
                 title,
                 summary,
                 annotations: annotations.slice(0, 50),
@@ -797,6 +808,11 @@ const ResultsCheck = {
     renderSummary(runMetas) {
         return __awaiter(this, void 0, void 0, function* () {
             return ResultsCheck.render(`${__dirname}/results-check-summary.hbs`, runMetas);
+        });
+    },
+    renderDetails(runMetas) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return ResultsCheck.render(`${__dirname}/results-check-details.hbs`, runMetas);
         });
     },
     render(viewPath, runMetas) {

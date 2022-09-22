@@ -7,7 +7,7 @@ import { RunMeta } from './results-meta';
 import path from 'path';
 
 const ResultsCheck = {
-  async createCheck(artifactsPath, githubToken, checkName) {
+  async createCheck(artifactsPath, githubToken, checkName, renderResultDetail) {
     // Validate input
     if (!fs.existsSync(artifactsPath) || !githubToken || !checkName) {
       throw new Error(
@@ -50,6 +50,12 @@ const ResultsCheck = {
     const title = runSummary.summary;
     const summary = await ResultsCheck.renderSummary(runs);
     core.debug(`Summary view: ${summary}`);
+    var details = '';
+    const renderDetail = renderResultDetail === 'true';
+    if (renderDetail) {
+      details = await ResultsCheck.renderDetails(runs);
+      core.debug(`Details view: ${details}`);
+    }
     const rawAnnotations = runSummary.extractAnnotations();
     core.debug(`Raw annotations: ${rawAnnotations}`);
     const annotations = rawAnnotations.map(rawAnnotation => {
@@ -58,7 +64,12 @@ const ResultsCheck = {
       return annotation;
     });
     core.debug(`Annotations: ${annotations}`);
-    const output = {
+    const output = renderDetail ? {
+      title,
+      summary,
+      text: details,
+      annotations: annotations.slice(0, 50),
+    } : {
       title,
       summary,
       annotations: annotations.slice(0, 50),
@@ -89,6 +100,10 @@ const ResultsCheck = {
 
   async renderSummary(runMetas) {
     return ResultsCheck.render(`${__dirname}/results-check-summary.hbs`, runMetas);
+  },
+
+  async renderDetails(runMetas) {
+    return ResultsCheck.render(`${__dirname}/results-check-details.hbs`, runMetas);
   },
 
   async render(viewPath, runMetas) {
