@@ -28,6 +28,7 @@ const Input = {
     const checkName = getInput('checkName') || 'Test Results';
     const chownFilesTo = getInput('chownFilesTo') || '';
     const licenseServer = getInput('licenseServer') || '';
+    const renderResultDetail = getInput('renderResultDetail') || 'true';
 
     // Validate input
     if (!this.testModes.includes(testMode)) {
@@ -69,6 +70,7 @@ const Input = {
       checkName,
       chownFilesTo,
       licenseServer,
+      renderResultDetail,
     };
   },
 };

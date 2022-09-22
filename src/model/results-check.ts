@@ -7,7 +7,7 @@ import { RunMeta } from './results-meta';
 import path from 'path';
 
 const ResultsCheck = {
-  async createCheck(artifactsPath, githubToken, checkName) {
+  async createCheck(artifactsPath, githubToken, checkName, renderResultDetail) {
     // Validate input
     if (!fs.existsSync(artifactsPath) || !githubToken || !checkName) {
       throw new Error(
@@ -50,8 +50,13 @@ const ResultsCheck = {
     const title = runSummary.summary;
     const summary = await ResultsCheck.renderSummary(runs);
     core.debug(`Summary view: ${summary}`);
-    const details = await ResultsCheck.renderDetails(runs);
-    core.debug(`Details view: ${details}`);
+    var details = '';
+    const renderDetail = Boolean(renderResultDetail);
+    if (renderDetail)
+    {
+      details = await ResultsCheck.renderDetails(runs);
+      core.debug(`Details view: ${details}`);
+    }
     const rawAnnotations = runSummary.extractAnnotations();
     core.debug(`Raw annotations: ${rawAnnotations}`);
     const annotations = rawAnnotations.map(rawAnnotation => {
@@ -60,12 +65,16 @@ const ResultsCheck = {
       return annotation;
     });
     core.debug(`Annotations: ${annotations}`);
-    const output = {
+    const output = renderDetail ? {
       title,
       summary,
       text: details,
       annotations: annotations.slice(0, 50),
-    };
+    } : {
+      title,
+      summary,
+      annotations: annotations.slice(0, 50),
+    }
 
     // Call GitHub API
     await ResultsCheck.requestGitHubCheck(githubToken, checkName, output);

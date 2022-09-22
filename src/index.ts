@@ -21,6 +21,7 @@ async function run() {
       checkName,
       chownFilesTo,
       licenseServer,
+      renderResultDetail,
     } = Input.getFromUser();
 
     const useLicenseServer = await CreateServiceConfig.writeServiceConfig(licenseServer, workspace);
@@ -52,7 +53,7 @@ async function run() {
     }
 
     if (githubToken) {
-      const failedTestCount = await ResultsCheck.createCheck(artifactsPath, githubToken, checkName);
+      const failedTestCount = await ResultsCheck.createCheck(artifactsPath, githubToken, checkName, renderResultDetail);
       if (failedTestCount >= 1) {
         core.setFailed(`Test(s) Failed! Check '${checkName}' for details.`);
       }

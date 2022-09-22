@@ -56,6 +56,10 @@ inputs:
     required: false
     default: ''
     description: 'By passing the contents of service-config.json(see. Unity build server) as a string, you can start using the license server.'
+  renderResultDetail:
+    required: false
+    default: true
+    description: 'If false than, remove detail parts in render test result'
 outputs:
   artifactsPath:
     description: 'Path where the artifacts are stored.'
