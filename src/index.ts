@@ -20,11 +20,10 @@ async function run() {
       githubToken,
       checkName,
       chownFilesTo,
-      licenseServer,
       renderResultDetail,
     } = Input.getFromUser();
 
-    const useLicenseServer = await CreateServiceConfig.writeServiceConfig(licenseServer, workspace);
+    const useLicenseServer = await CreateServiceConfig.writeServiceConfig(workspace);
 
     const baseImage = new ImageTag({ editorVersion, customImage });
     const runnerTemporaryPath = process.env.RUNNER_TEMP;

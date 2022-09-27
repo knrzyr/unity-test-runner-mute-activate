@@ -42,8 +42,8 @@ function run() {
         try {
             model_1.Action.checkCompatibility();
             const { workspace, actionFolder } = model_1.Action;
-            const { editorVersion, customImage, projectPath, customParameters, testMode, coverageOptions, artifactsPath, useHostNetwork, sshAgent, gitPrivateToken, githubToken, checkName, chownFilesTo, licenseServer, renderResultDetail, } = model_1.Input.getFromUser();
-            const useLicenseServer = yield model_1.CreateServiceConfig.writeServiceConfig(licenseServer, workspace);
+            const { editorVersion, customImage, projectPath, customParameters, testMode, coverageOptions, artifactsPath, useHostNetwork, sshAgent, gitPrivateToken, githubToken, checkName, chownFilesTo, renderResultDetail, } = model_1.Input.getFromUser();
+            const useLicenseServer = yield model_1.CreateServiceConfig.writeServiceConfig(workspace);
             const baseImage = new model_1.ImageTag({ editorVersion, customImage });
             const runnerTemporaryPath = process.env.RUNNER_TEMP;
             try {
@@ -151,13 +151,13 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const fs_1 = __nccwpck_require__(7147);
 const path_1 = __nccwpck_require__(1017);
 const CreateServiceConfig = {
-    writeServiceConfig(licenseServer, workspace) {
+    writeServiceConfig(workspace) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (licenseServer.length <= 0)
+            if (process.env.UNITY_LICENSE_SERVER === undefined)
                 return false;
             const filePath = (0, path_1.join)(workspace, 'services-config.json');
             try {
-                yield fs_1.promises.writeFile(filePath, licenseServer, {
+                yield fs_1.promises.writeFile(filePath, process.env.UNITY_LICENSE_SERVER, {
                     flag: 'w',
                 });
                 return true;
@@ -253,7 +253,7 @@ const Docker = {
                 --env RUNNER_WORKSPACE \
                 --env GIT_PRIVATE_TOKEN="${gitPrivateToken}" \
                 --env CHOWN_FILES_TO="${chownFilesTo}" \
-                ${useLicenseServer ? '--env UNITY_LICENSE_SERVER' : ''} \
+                --env UNITY_LICENSE_SERVER \
                 ${sshAgent ? '--env SSH_AUTH_SOCK=/ssh-agent' : ''} \
                 --volume "${githubHome}:/root:z" \
                 --volume "${githubWorkflow}:/github/workflow:z" \
@@ -309,7 +309,7 @@ const Docker = {
                 --env RUNNER_WORKSPACE \
                 --env GIT_PRIVATE_TOKEN="${gitPrivateToken}" \
                 --env CHOWN_FILES_TO="${chownFilesTo}" \
-                ${useLicenseServer ? '--env UNITY_LICENSE_SERVER' : ''} \
+                --env UNITY_LICENSE_SERVER \
                 ${sshAgent ? '--env SSH_AUTH_SOCK=c:/ssh-agent' : ''} \
                 --volume "${githubHome}":"c:/root" \
                 --volume "${githubWorkflow}":"c:/github/workflow" \
@@ -530,7 +530,6 @@ const Input = {
         const githubToken = (0, core_1.getInput)('githubToken') || '';
         const checkName = (0, core_1.getInput)('checkName') || 'Test Results';
         const chownFilesTo = (0, core_1.getInput)('chownFilesTo') || '';
-        const licenseServer = (0, core_1.getInput)('licenseServer') || '';
         const renderResultDetail = (0, core_1.getInput)('renderResultDetail') || 'true';
         // Validate input
         if (!this.testModes.includes(testMode)) {
@@ -565,7 +564,6 @@ const Input = {
             githubToken,
             checkName,
             chownFilesTo,
-            licenseServer,
             renderResultDetail,
         };
     },

@@ -2,7 +2,16 @@
 Write-Output "Changing to $ACTIVATE_LICENSE_PATH directory."
 Push-Location "$ACTIVATE_LICENSE_PATH"
 
-if ( ($null -ne ${env:UNITY_LICENSE}) -or ($null -ne ${env:UNITY_LICENSE_FILE}) )
+if ( ($null -ne ${env:UNITY_LICENSE}))
+{
+    #
+    # BUILD SERVER LICENSE MODE
+    #
+
+    Write-Output "Activate by license server"
+    $UNITY_EXIT_CODE = 0
+}
+elseif ( ($null -ne ${env:UNITY_LICENSE}) -or ($null -ne ${env:UNITY_LICENSE_FILE}) )
 {
     #
     # PERSONAL LICENSE MODE

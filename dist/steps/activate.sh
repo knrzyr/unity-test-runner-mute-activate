@@ -6,7 +6,8 @@ pushd "$ACTIVATE_LICENSE_PATH"
 
 if [[ -n "$UNITY_LICENSE_SERVER" ]]; then
 
- echo "Activate by license server"
+  echo "Activate by license server"
+  UNITY_EXIT_CODE=0
 
 elif [[ -n "$UNITY_LICENSE" ]] || [[ -n "$UNITY_LICENSE_FILE"  ]]; then
   #

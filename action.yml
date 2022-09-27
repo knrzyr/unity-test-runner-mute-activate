@@ -52,10 +52,6 @@ inputs:
     required: false
     default: ''
     description: 'User and optionally group (user or user:group or uid:gid) to give ownership of the resulting build artifacts'
-  licenseServer:
-    required: false
-    default: ''
-    description: 'By passing the contents of service-config.json(see. Unity build server) as a string, you can start using the license server.'
   renderResultDetail:
     required: false
     default: true
