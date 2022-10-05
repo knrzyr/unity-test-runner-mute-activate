@@ -11,7 +11,14 @@ New-Item -Path "$ACTIVATE_LICENSE_PATH" -ItemType Directory
 
 & $PSScriptRoot\steps\activate.ps1
 & $PSScriptRoot\steps\set_gitcredential.ps1
-& $PSScriptRoot\steps\run_tests.ps1
+if ( ($null -ne ${env:EXECUTE_METHOD}))
+{
+    & $PSScriptRoot\steps\run_batch.ps1
+}
+else
+{
+    & $PSScriptRoot\steps\run_tests.ps1
+}
 & $PSScriptRoot\steps\return_license.ps1
 
 #
@@ -24,7 +31,7 @@ Remove-Item "$ACTIVATE_LICENSE_PATH" -Recurse -Force
 # Instructions for debugging
 #
 
-if ($TEST_RUNNER_EXIT_CODE -gt 0)
+if ($UNITY_RUNNER_EXIT_CODE -gt 0)
 {
     Write-Output ""
     Write-Output "###########################"
@@ -42,7 +49,7 @@ if ($TEST_RUNNER_EXIT_CODE -gt 0)
 # Exit with code from the build step.
 #
 
-if ( ($USE_EXIT_CODE -eq "true") -and ($TEST_RUNNER_EXIT_CODE -ne 2) )
+if ( ($USE_EXIT_CODE -eq "true") -and ($UNITY_RUNNER_EXIT_CODE -ne 2) )
 {
-    exit $TEST_RUNNER_EXIT_CODE
+    exit $UNITY_RUNNER_EXIT_CODE
 }

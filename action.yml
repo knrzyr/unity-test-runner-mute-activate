@@ -56,6 +56,10 @@ inputs:
     required: false
     default: true
     description: 'If false than, remove detail parts in render test result'
+  executeMethod:
+    required: false
+    default: ''
+    description: 'If not empty than, run batchmode instead of run test'
 outputs:
   artifactsPath:
     description: 'Path where the artifacts are stored.'
