@@ -42,34 +42,54 @@ function run() {
         try {
             model_1.Action.checkCompatibility();
             const { workspace, actionFolder } = model_1.Action;
-            const { editorVersion, customImage, projectPath, customParameters, testMode, coverageOptions, artifactsPath, useHostNetwork, sshAgent, gitPrivateToken, githubToken, checkName, chownFilesTo, renderResultDetail, } = model_1.Input.getFromUser();
+            const { editorVersion, customImage, projectPath, customParameters, testMode, coverageOptions, artifactsPath, useHostNetwork, sshAgent, gitPrivateToken, githubToken, checkName, chownFilesTo, renderResultDetail, executeMethod, } = model_1.Input.getFromUser();
             const useLicenseServer = yield model_1.CreateServiceConfig.writeServiceConfig(workspace);
             const baseImage = new model_1.ImageTag({ editorVersion, customImage });
             const runnerTemporaryPath = process.env.RUNNER_TEMP;
             try {
-                yield model_1.Docker.run(baseImage, {
-                    actionFolder,
-                    editorVersion,
-                    workspace,
-                    projectPath,
-                    customParameters,
-                    testMode,
-                    coverageOptions,
-                    artifactsPath,
-                    useHostNetwork,
-                    sshAgent,
-                    gitPrivateToken,
-                    githubToken,
-                    runnerTemporaryPath,
-                    chownFilesTo,
-                    useLicenseServer,
-                });
+                if (executeMethod) {
+                    yield model_1.BatchDocker.run(baseImage, {
+                        actionFolder,
+                        editorVersion,
+                        workspace,
+                        projectPath,
+                        customParameters,
+                        executeMethod,
+                        artifactsPath,
+                        useHostNetwork,
+                        sshAgent,
+                        gitPrivateToken,
+                        githubToken,
+                        runnerTemporaryPath,
+                        chownFilesTo,
+                        useLicenseServer,
+                    });
+                }
+                else {
+                    yield model_1.Docker.run(baseImage, {
+                        actionFolder,
+                        editorVersion,
+                        workspace,
+                        projectPath,
+                        customParameters,
+                        testMode,
+                        coverageOptions,
+                        artifactsPath,
+                        useHostNetwork,
+                        sshAgent,
+                        gitPrivateToken,
+                        githubToken,
+                        runnerTemporaryPath,
+                        chownFilesTo,
+                        useLicenseServer,
+                    });
+                }
             }
             finally {
                 yield model_1.Output.setArtifactsPath(artifactsPath);
                 yield model_1.Output.setCoveragePath('CodeCoverage');
             }
-            if (githubToken) {
+            if (githubToken && !executeMethod) {
                 const failedTestCount = yield model_1.ResultsCheck.createCheck(artifactsPath, githubToken, checkName, renderResultDetail);
                 if (failedTestCount >= 1) {
                     core.setFailed(`Test(s) Failed! Check '${checkName}' for details.`);
@@ -129,6 +149,160 @@ const Action = {
     },
 };
 exports["default"] = Action;
+
+
+/***/ }),
+
+/***/ 9058:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const fs_1 = __nccwpck_require__(7147);
+const exec_1 = __nccwpck_require__(1514);
+const path_1 = __importDefault(__nccwpck_require__(1017));
+const BatchDocker = {
+    run(image, parameters, silent = false) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let runCommand = '';
+            switch (process.platform) {
+                case 'linux':
+                    runCommand = this.getLinuxCommand(image, parameters);
+                    break;
+                case 'win32':
+                    runCommand = this.getWindowsCommand(image, parameters);
+                    break;
+                default:
+                    throw new Error(`Operation system, ${process.platform}, is not supported yet.`);
+            }
+            yield (0, exec_1.exec)(runCommand, undefined, { silent });
+        });
+    },
+    getLinuxCommand(image, parameters) {
+        const { actionFolder, editorVersion, workspace, projectPath, customParameters, executeMethod, artifactsPath, useHostNetwork, sshAgent, gitPrivateToken, githubToken, runnerTemporaryPath, chownFilesTo, useLicenseServer, } = parameters;
+        const githubHome = path_1.default.join(runnerTemporaryPath, '_github_home');
+        if (!(0, fs_1.existsSync)(githubHome))
+            (0, fs_1.mkdirSync)(githubHome);
+        const githubWorkflow = path_1.default.join(runnerTemporaryPath, '_github_workflow');
+        if (!(0, fs_1.existsSync)(githubWorkflow))
+            (0, fs_1.mkdirSync)(githubWorkflow);
+        const executeMethodEnv = executeMethod ? `--env EXECUTE_METHOD="${executeMethod}"` : '';
+        return `docker run \
+                --workdir /github/workspace \
+                --rm \
+                --env UNITY_LICENSE \
+                --env UNITY_LICENSE_FILE \
+                --env UNITY_EMAIL \
+                --env UNITY_PASSWORD \
+                --env UNITY_SERIAL \
+                --env UNITY_VERSION="${editorVersion}" \
+                --env PROJECT_PATH="${projectPath}" \
+                --env CUSTOM_PARAMETERS="${customParameters}" \
+                --env ARTIFACTS_PATH="${artifactsPath}" \
+                ${executeMethodEnv} \
+                --env GITHUB_REF \
+                --env GITHUB_SHA \
+                --env GITHUB_REPOSITORY \
+                --env GITHUB_ACTOR \
+                --env GITHUB_WORKFLOW \
+                --env GITHUB_HEAD_REF \
+                --env GITHUB_BASE_REF \
+                --env GITHUB_EVENT_NAME \
+                --env GITHUB_WORKSPACE="/github/workspace" \
+                --env GITHUB_ACTION \
+                --env GITHUB_EVENT_PATH \
+                --env RUNNER_OS \
+                --env RUNNER_TOOL_CACHE \
+                --env RUNNER_TEMP \
+                --env RUNNER_WORKSPACE \
+                --env GIT_PRIVATE_TOKEN="${gitPrivateToken}" \
+                --env CHOWN_FILES_TO="${chownFilesTo}" \
+                --env UNITY_LICENSE_SERVER \
+                ${sshAgent ? '--env SSH_AUTH_SOCK=/ssh-agent' : ''} \
+                --volume "${githubHome}:/root:z" \
+                --volume "${githubWorkflow}:/github/workflow:z" \
+                --volume "${workspace}:/github/workspace:z" \
+                --volume "${actionFolder}/steps:/steps:z" \
+                --volume "${actionFolder}/entrypoint.sh:/entrypoint.sh:z" \
+                ${sshAgent ? `--volume ${sshAgent}:/ssh-agent` : ''} \
+                ${sshAgent ? `--volume /home/runner/.ssh/known_hosts:/root/.ssh/known_hosts:ro` : ''} \
+                ${useHostNetwork ? '--net=host' : ''} \
+                ${githubToken ? '--env USE_EXIT_CODE=false' : '--env USE_EXIT_CODE=true'} \
+                ${useLicenseServer ? `--volume ${workspace}/services-config.json:/usr/share/unity3d/config/services-config.json` : ''} \
+                ${image} \
+                /bin/bash -c /entrypoint.sh`;
+    },
+    getWindowsCommand(image, parameters) {
+        const { actionFolder, editorVersion, workspace, projectPath, customParameters, executeMethod, artifactsPath, useHostNetwork, sshAgent, gitPrivateToken, githubToken, runnerTemporaryPath, chownFilesTo, useLicenseServer, } = parameters;
+        const githubHome = path_1.default.join(runnerTemporaryPath, '_github_home');
+        if (!(0, fs_1.existsSync)(githubHome))
+            (0, fs_1.mkdirSync)(githubHome);
+        const githubWorkflow = path_1.default.join(runnerTemporaryPath, '_github_workflow');
+        if (!(0, fs_1.existsSync)(githubWorkflow))
+            (0, fs_1.mkdirSync)(githubWorkflow);
+        const executeMethodEnv = executeMethod ? `--env EXECUTE_METHOD="${executeMethod}"` : '';
+        return `docker run \
+                --workdir /github/workspace \
+                --rm \
+                --env UNITY_LICENSE \
+                --env UNITY_LICENSE_FILE \
+                --env UNITY_EMAIL \
+                --env UNITY_PASSWORD \
+                --env UNITY_SERIAL \
+                --env UNITY_VERSION="${editorVersion}" \
+                --env PROJECT_PATH="${projectPath}" \
+                --env CUSTOM_PARAMETERS="${customParameters}" \
+                --env ARTIFACTS_PATH="${artifactsPath}" \
+                ${executeMethodEnv} \
+                --env GITHUB_REF \
+                --env GITHUB_SHA \
+                --env GITHUB_REPOSITORY \
+                --env GITHUB_ACTOR \
+                --env GITHUB_WORKFLOW \
+                --env GITHUB_HEAD_REF \
+                --env GITHUB_BASE_REF \
+                --env GITHUB_EVENT_NAME \
+                --env GITHUB_WORKSPACE="/github/workspace" \
+                --env GITHUB_ACTION \
+                --env GITHUB_EVENT_PATH \
+                --env RUNNER_OS \
+                --env RUNNER_TOOL_CACHE \
+                --env RUNNER_TEMP \
+                --env RUNNER_WORKSPACE \
+                --env GIT_PRIVATE_TOKEN="${gitPrivateToken}" \
+                --env CHOWN_FILES_TO="${chownFilesTo}" \
+                --env UNITY_LICENSE_SERVER \
+                ${sshAgent ? '--env SSH_AUTH_SOCK=c:/ssh-agent' : ''} \
+                --volume "${githubHome}":"c:/root" \
+                --volume "${githubWorkflow}":"c:/github/workflow" \
+                --volume "${workspace}":"c:/github/workspace" \
+                --volume "${actionFolder}/steps":"c:/steps" \
+                --volume "${actionFolder}":"c:/dist" \
+                ${sshAgent ? `--volume ${sshAgent}:c:/ssh-agent` : ''} \
+                ${sshAgent
+            ? `--volume c:/Users/Administrator/.ssh/known_hosts:c:/root/.ssh/known_hosts`
+            : ''} \
+                ${useHostNetwork ? '--net=host' : ''} \
+                ${githubToken ? '--env USE_EXIT_CODE=false' : '--env USE_EXIT_CODE=true'} \
+                ${useLicenseServer ? `--volume ${workspace}/services-config.json:c:/ProgramData/Unity/config/services-config.json` : ''} \
+                ${image} \
+                powershell c:/dist/entrypoint.ps1`;
+    },
+};
+exports["default"] = BatchDocker;
 
 
 /***/ }),
@@ -477,7 +651,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.CreateServiceConfig = exports.ResultsCheck = exports.Output = exports.Input = exports.ImageTag = exports.Docker = exports.Action = void 0;
+exports.BatchDocker = exports.CreateServiceConfig = exports.ResultsCheck = exports.Output = exports.Input = exports.ImageTag = exports.Docker = exports.Action = void 0;
 var action_1 = __nccwpck_require__(9088);
 Object.defineProperty(exports, "Action", ({ enumerable: true, get: function () { return __importDefault(action_1).default; } }));
 var docker_1 = __nccwpck_require__(6934);
@@ -492,6 +666,8 @@ var results_check_1 = __nccwpck_require__(9183);
 Object.defineProperty(exports, "ResultsCheck", ({ enumerable: true, get: function () { return __importDefault(results_check_1).default; } }));
 var create_serviceconfig_1 = __nccwpck_require__(4857);
 Object.defineProperty(exports, "CreateServiceConfig", ({ enumerable: true, get: function () { return __importDefault(create_serviceconfig_1).default; } }));
+var batch_docker_1 = __nccwpck_require__(9058);
+Object.defineProperty(exports, "BatchDocker", ({ enumerable: true, get: function () { return __importDefault(batch_docker_1).default; } }));
 
 
 /***/ }),
@@ -531,8 +707,9 @@ const Input = {
         const checkName = (0, core_1.getInput)('checkName') || 'Test Results';
         const chownFilesTo = (0, core_1.getInput)('chownFilesTo') || '';
         const renderResultDetail = (0, core_1.getInput)('renderResultDetail') || 'true';
+        const executeMethod = (0, core_1.getInput)('executeMethod') || '';
         // Validate input
-        if (!this.testModes.includes(testMode)) {
+        if (!this.testModes.includes(testMode) && !executeMethod) {
             throw new Error(`Invalid testMode ${testMode}`);
         }
         if (!this.isValidFolderName(rawProjectPath)) {
@@ -565,6 +742,7 @@ const Input = {
             checkName,
             chownFilesTo,
             renderResultDetail,
+            executeMethod,
         };
     },
 };

@@ -101,7 +101,7 @@ foreach ( $platform in ${env:TEST_PLATFORMS}.Split(";") )
 
     if ( $TEST_EXIT_CODE -ne 0)
     {
-        $TEST_RUNNER_EXIT_CODE = $TEST_EXIT_CODE
+        $UNITY_RUNNER_EXIT_CODE = $TEST_EXIT_CODE
     }
 
     Write-Output ""

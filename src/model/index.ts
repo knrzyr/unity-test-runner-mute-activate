@@ -5,3 +5,4 @@ export { default as Input } from './input';
 export { default as Output } from './output';
 export { default as ResultsCheck } from './results-check';
 export { default as CreateServiceConfig } from './create-serviceconfig';
+export { default as BatchDocker } from './batch_docker';

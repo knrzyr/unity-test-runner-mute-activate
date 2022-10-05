@@ -28,9 +28,10 @@ const Input = {
     const checkName = getInput('checkName') || 'Test Results';
     const chownFilesTo = getInput('chownFilesTo') || '';
     const renderResultDetail = getInput('renderResultDetail') || 'true';
+    const executeMethod = getInput('executeMethod') || '';
 
     // Validate input
-    if (!this.testModes.includes(testMode)) {
+    if (!this.testModes.includes(testMode) && !executeMethod) {
       throw new Error(`Invalid testMode ${testMode}`);
     }
 
@@ -69,6 +70,7 @@ const Input = {
       checkName,
       chownFilesTo,
       renderResultDetail,
+      executeMethod,
     };
   },
 };

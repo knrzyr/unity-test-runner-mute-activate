@@ -13,7 +13,11 @@ mkdir -p "$ACTIVATE_LICENSE_PATH"
 
 source /steps/activate.sh
 source /steps/set_gitcredential.sh
-source /steps/run_tests.sh
+if [[ -n "$EXECUTE_METHOD" ]]; then
+  source /steps/run_batch.sh
+else
+  source /steps/run_tests.sh
+fi
 source /steps/return_license.sh
 
 #
@@ -26,7 +30,7 @@ rm -r "$ACTIVATE_LICENSE_PATH"
 # Instructions for debugging
 #
 
-if [[ $TEST_RUNNER_EXIT_CODE -gt 0 ]]; then
+if [[ $UNITY_RUNNER_EXIT_CODE -gt 0 ]]; then
 echo ""
 echo "###########################"
 echo "#         Failure         #"
@@ -43,6 +47,6 @@ fi;
 # Exit with code from the build step.
 #
 
-if [[ $USE_EXIT_CODE == true || $TEST_RUNNER_EXIT_CODE -ne 2 ]]; then
-exit $TEST_RUNNER_EXIT_CODE
+if [[ $USE_EXIT_CODE == true || $UNITY_RUNNER_EXIT_CODE -ne 2 ]]; then
+exit $UNITY_RUNNER_EXIT_CODE
 fi;

@@ -1,5 +1,5 @@
 import * as core from '@actions/core';
-import { Action, Docker, ImageTag, Input, Output, ResultsCheck, CreateServiceConfig } from './model';
+import { Action, Docker, BatchDocker, ImageTag, Input, Output, ResultsCheck, CreateServiceConfig } from './model';
 
 async function run() {
   try {
@@ -21,6 +21,7 @@ async function run() {
       checkName,
       chownFilesTo,
       renderResultDetail,
+      executeMethod,
     } = Input.getFromUser();
 
     const useLicenseServer = await CreateServiceConfig.writeServiceConfig(workspace);
@@ -29,29 +30,49 @@ async function run() {
     const runnerTemporaryPath = process.env.RUNNER_TEMP;
 
     try {
-      await Docker.run(baseImage, {
-        actionFolder,
-        editorVersion,
-        workspace,
-        projectPath,
-        customParameters,
-        testMode,
-        coverageOptions,
-        artifactsPath,
-        useHostNetwork,
-        sshAgent,
-        gitPrivateToken,
-        githubToken,
-        runnerTemporaryPath,
-        chownFilesTo,
-        useLicenseServer,
-      });
+      if (executeMethod) {
+        await BatchDocker.run(baseImage, {
+          actionFolder,
+          editorVersion,
+          workspace,
+          projectPath,
+          customParameters,
+          executeMethod,
+          artifactsPath,
+          useHostNetwork,
+          sshAgent,
+          gitPrivateToken,
+          githubToken,
+          runnerTemporaryPath,
+          chownFilesTo,
+          useLicenseServer,
+        });
+      }
+      else {
+        await Docker.run(baseImage, {
+          actionFolder,
+          editorVersion,
+          workspace,
+          projectPath,
+          customParameters,
+          testMode,
+          coverageOptions,
+          artifactsPath,
+          useHostNetwork,
+          sshAgent,
+          gitPrivateToken,
+          githubToken,
+          runnerTemporaryPath,
+          chownFilesTo,
+          useLicenseServer,
+        });
+      }
     } finally {
       await Output.setArtifactsPath(artifactsPath);
       await Output.setCoveragePath('CodeCoverage');
     }
 
-    if (githubToken) {
+    if (githubToken && !executeMethod) {
       const failedTestCount = await ResultsCheck.createCheck(artifactsPath, githubToken, checkName, renderResultDetail);
       if (failedTestCount >= 1) {
         core.setFailed(`Test(s) Failed! Check '${checkName}' for details.`);

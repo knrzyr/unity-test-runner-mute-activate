@@ -100,7 +100,7 @@ for platform in ${TEST_PLATFORMS//;/ }; do
   fi
 
   if [ $TEST_EXIT_CODE -ne 0 ]; then
-    TEST_RUNNER_EXIT_CODE=$TEST_EXIT_CODE
+    UNITY_RUNNER_EXIT_CODE=$TEST_EXIT_CODE
   fi
 
   echo ""
