@@ -1091,7 +1091,7 @@ class RunMeta extends Meta {
             return '❌️';
         else if (this.skipped === 0)
             return '✅';
-        return '⚠️';
+        return '✅';
     }
 }
 exports.RunMeta = RunMeta;
@@ -1116,7 +1116,7 @@ class TestMeta extends Meta {
         if (this.isFailed())
             return '❌️';
         else if (this.isSkipped())
-            return '⚠️';
+            return '✅';
         return '✅';
     }
 }
