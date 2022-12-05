@@ -55,7 +55,7 @@ Write-Output "#   Batchmode             #"
 Write-Output "###########################"
 Write-Output ""
 
-$RUN_OUTPUT = Start-Process -NoNewWindow -Wait -PassThru "C:\Program Files\Unity\Hub\Editor\${env:UNITY_VERSION}\editor\Unity.exe" -ArgumentList "-batchmode -logFile $FULL_ARTIFACTS_PATH\run.log -projectPath $UNITY_PROJECT_PATH -executeMethod $EXECUTE_METHOD -quit ${env:CUSTOM_PARAMETERS}"
+$RUN_OUTPUT = Start-Process -NoNewWindow -Wait -PassThru "C:\Program Files\Unity\Hub\Editor\${env:UNITY_VERSION}\editor\Unity.exe" -ArgumentList "-batchmode  -logFile - -projectPath $UNITY_PROJECT_PATH -executeMethod $EXECUTE_METHOD -quit ${env:CUSTOM_PARAMETERS} | Tee-Object -FilePath $FULL_ARTIFACTS_PATH\run.log"
 
 # Catch exit code
 $RUN_EXIT_CODE = $RUN_OUTPUT.ExitCode
