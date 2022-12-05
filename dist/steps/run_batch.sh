@@ -60,11 +60,11 @@ echo ""
 
 unity-editor \
     -batchmode \
-    -logFile "$FULL_ARTIFACTS_PATH/run.log" \
     -projectPath "$UNITY_PROJECT_PATH" \
     -executeMethod "$EXECUTE_METHOD" \
     -quit \
-    $CUSTOM_PARAMETERS
+    $CUSTOM_PARAMETERS \
+    | tee "$FULL_ARTIFACTS_PATH/run.log"
 
 # Catch exit code
 RUN_EXIT_CODE=$?
